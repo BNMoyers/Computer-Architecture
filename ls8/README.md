@@ -60,6 +60,16 @@ but you'll have to implement those three above instructions first!
 ## Step 0: IMPORTANT: inventory what is here!
 
 * Make a list of files here.
+  -- example files for different programs/instructions we might want to implement, named for what they do.
+    call - calls registers
+    interrupts - how to trick humans into thinking it's doing more than one thing
+    keyboard - interprets keyboard commands
+    mult - multiplies
+    print8 - prints the number 8
+    printstr - prints a string with 'hello' and what's at each location
+    sctest - tests what's at each location
+    stack - the stack
+    stackoverflow - how to handle too much on stack
 * Write a short 3-10-word description of what each file does.
 * Note what has been implemented, and what hasn't.
 * Read this whole file.

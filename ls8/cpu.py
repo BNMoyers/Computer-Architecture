@@ -1,13 +1,22 @@
 """CPU functionality."""
 
 import sys
+from _ast import While
 
 class CPU:
     """Main CPU class."""
+    #op names
+    HLT = 0b00000001
+    LDI = 0b10000010
+    PRN = 0b01000111
+
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        #list properties to hold 256 memory and 8 registers
+        self.ram = [0] * 256
+        self.register = [0] * 8
+        self.pc = 0
 
     def load(self):
         """Load a program into memory."""
@@ -40,6 +49,13 @@ class CPU:
         else:
             raise Exception("Unsupported ALU operation")
 
+    def ram_read(self, MAR):
+        return self.ram[MAR]
+
+    def ram_write(self, MDR, MAR):
+        self.ram[MAR] = MDR
+        return self.ram[MAR]
+
     def trace(self):
         """
         Handy function to print out the CPU state. You might want to call this
@@ -62,4 +78,21 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        while True:
+            IR = self.pc
+            op = ram_read(IR)
+            operand_a = ram_read(IR +1)
+            operand_b = ram_read(IR +2)
+
+            if op == HLT:
+                break
+            elif op == LDI:
+                self.ram_write(int(operand_a), operand_b)
+                self.pc += 3
+            elif op == PRN:
+                print_target = self.ram_read(operand_a)
+                print(int(print_target))
+                self.pc += 2
+            else:
+                print("ERROR: no such command")
+                sys.exit(1)

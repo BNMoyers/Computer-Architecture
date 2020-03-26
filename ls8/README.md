@@ -190,6 +190,7 @@ sys.argv[1] == "examples/mult.ls8"
 
 so you can look in `sys.argv[1]` for the name of the file to load.
 
+
 > Bonus: check to make sure the user has put a command line argument where you
 > expect, and print an error and exit if they didn't.
 

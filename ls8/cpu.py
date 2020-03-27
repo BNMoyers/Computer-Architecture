@@ -10,18 +10,20 @@ class CPU:
         """Construct a new CPU."""
         self.ram = [0] * 256
         self.reg = [0] * 8
-        self.reg[7] = 0xF4 #set the last reg to the sp
+        self.reg[7] = 0xF4  # set the last reg to the sp
         self.pc = 0
-        self.sp = 7
 
     # op codes and handler
         self.handler = {
+            0b10100000: self.handle_ADD,
+            0b01010000: self.handle_CALL,
             0b00000001: self.handle_HLT,
             0b10000010: self.handle_LDI,
             0b10100010: self.handle_MUL,
             0b01000110: self.handle_POP,
             0b01000111: self.handle_PRN,
-            0b01000101: self.handle_PUSH
+            0b01000101: self.handle_PUSH,
+            0b00010001: self.handle_RET
         }
 
     def load(self, file):
@@ -40,21 +42,21 @@ class CPU:
             self.ram[address] = instruction
             address += 1
 
-    # def alu(self, op, reg_a, reg_b):
-    #     """ALU operations."""
-
-    #     if op == "ADD":
-    #         self.reg[reg_a] += self.reg[reg_b]
-    #     # elif op == "SUB": etc
-    #     else:
-    #         raise Exception("Unsupported ALU operation")
-
-    def cu(self, op, reg_a, reg_b):
+    def handle_instructions(self, op, reg_a, reg_b):
         """CU operations."""
         try:
             self.handler[op](reg_a, reg_b)
         except KeyError:
             raise Exception("No such op code")
+
+    def handle_ADD(self, reg_a, reg_b):
+         self.reg[reg_a] += self.reg[reg_b]
+         self.pc += 3
+    
+    def handle_CALL(self, reg_a, reg_b):
+       self.reg[7] -= 1
+       self.ram_write(self.pc + 2, self.reg[7])
+       self.pc = self.reg[reg_a]
 
     def handle_HLT(self, reg_a, reg_b):
         self.pc += 1
@@ -63,24 +65,30 @@ class CPU:
     def handle_LDI(self, reg_a, reg_b):
         self.reg[reg_a] = reg_b
         self.pc += 3
-    
+
     def handle_MUL(self, reg_a, reg_b):
         self.reg[reg_a] = (self.reg[reg_a] * self.reg[reg_b])
         self.pc += 3
 
     def handle_POP(self, reg_a, reg_b):
-        self.reg[reg_a] = self.ram[self.sp]
-        self.sp +=1
+        self.reg[reg_a] = self.ram_read(self.reg[7])
+        self.reg[7] += 1
         self.pc += 2
+        return self.reg[reg_a]
 
     def handle_PRN(self, reg_a, reg_b):
         print(self.reg[reg_a])
         self.pc += 2
-    
+
     def handle_PUSH(self, reg_a, reg_b):
-        self.sp -= 1
-        self.ram[self.sp] = self.reg[reg_a]
+        self.reg[7] -= 1
+        self.ram_write(self.reg[reg_a], self.reg[7])
         self.pc += 2
+
+    def handle_RET(self, reg_a, reg_b):
+        self.pc = self.ram_read(self.reg[7])
+        self.reg[7] += 1
+        
 
     def ram_read(self, address):
         return self.ram[address]
@@ -121,5 +129,4 @@ class CPU:
             operand_a = self.ram_read(self.pc + 1)
             operand_b = self.ram_read(self.pc + 2)
 
-            self.cu(IR, operand_a, operand_b)
-
+            self.handle_instructions(IR, operand_a, operand_b)
